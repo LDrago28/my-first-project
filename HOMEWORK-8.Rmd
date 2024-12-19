@@ -1,0 +1,121 @@
+---
+title: "HOMEWORK-8"
+author: "Furkan Emir Akdemir"
+date: "2024-12-17"
+output: word_document
+---
+
+1.Import and change name of the data
+
+```{r}
+library(readr)
+framingham <- read.csv("D:/HOMEWORK-8/framingham.csv")
+datasmt <- framingham
+```
+
+2.Load necessary packages
+
+```{r}
+library(psych)
+```
+
+3.Exploratory Data Analysis
+
+I used psych for more detailed descriptive statistics
+
+```{r}
+describe(datasmt) 
+summary(datasmt)
+```
+4.Visualization the data to identify outliers and distributions.
+
+Boxplots identify outliers.
+
+```{r}
+# Boxplots for selected numeric variables
+
+numeric_columns <- c("age", "cigsPerDay", "totChol", "sysBP", "male", "glucose")
+
+#Loop through the numeric columns and create boxplots
+
+par(mfrow = c(3, 3))  # # Layout: 3x3 grid for multiple plots
+
+for (col in numeric_columns) {
+  boxplot(datasmt[[col]], 
+          main = paste("Boxplot of", col),
+          col = "skyblue",
+          ylab = col) }
+```
+Histograms identify distributions.
+
+```{r}
+# Histograms for numeric columns
+
+par(mfrow = c(3, 3))  # Reset to 3x3 layout
+
+for (col in numeric_columns) {
+  hist(datasmt[[col]], 
+       main = paste("Histogram of", col), 
+       xlab = col,
+       col = "lightgreen",
+       border = "white")
+}
+```
+#Comments about boxplots and histograms
+
+-cigsPerDay has extreme outliers (heavy smokers).
+-totChol shows a few high cholesterol values.
+-sysBP  have notable outliers, indicating hypertension cases.
+-glucose has extreme outliers, suggesting potential diabetes cases
+-male and age has no outliers.
+-age appears well-distributed , others is not well-distributed.
+
+
+
+5.To decide which model is best
+
+```{r}
+#Multi Linear Regression 
+datasmt <- na.omit(datasmt) #Remove missing values
+lm_model <- lm(TenYearCHD ~ age + male + cigsPerDay + totChol + sysBP + glucose, data = datasmt)
+summary(lm_model) #summary model
+
+#Logit Model
+logit_model <- glm(TenYearCHD ~ age + male + cigsPerDay + totChol + sysBP + glucose, data = datasmt, family = binomial(link="logit"))
+summary(logit_model)
+
+#Probit Model
+probit_model <- glm(TenYearCHD ~ age + male + cigsPerDay + totChol + sysBP + glucose, data = datasmt, family = binomial(link= "probit"))
+summary(probit_model)
+
+```
+
+Compare Models
+
+Linear Regression: The r-squared value is 0.098 and the r-squared model explains %9.8, this value is very low, so we can say that the model is not suitable.
+
+Logit Model and Probit Model: AIC value of the logit model = 2776.5, AIC value of the probit model = 2777.8, the AIC values of both models are quite close, but since the lower AIC value is more compatible with the model, we say that the logit model is more compatible.
+
+As a result, the best fitting model is the logit model.
+
+5.Comment about model and variables
+
+Logit Model "Pr(\>\|z\|)" shows the p-value for each coefficient. Since all independent variables have p-values \< 0.05, they are all statistically significant. This indicates that there is strong evidence that these variables affect the risk of developing coronary heart disease within 10 years.
+
+age:The coefficient is 0.065896. This means that each unit increase in age (for example, 1 year) increases the log-odds ratio of the probability of developing coronary heart disease within 10 years by 0.065896 units.
+
+male:The coefficient is 0.561446. Men have a log-odds ratio of 0.561446 units greater chance of developing coronary heart disease within 10 years than women.
+
+cigsPerDay:The coefficient is 0.019226. It means that each cigarette smoked per day increases the log-odds ratio of the probability of developing coronary heart disease within 10 years by 0.019226 units.
+
+totChol: The coefficient is 0.002272. It means that each unit increase in total cholesterol increases the log-odds ratio of the probability of developing coronary heart disease within 10 years by 0.002272 units.
+
+sysBP:The coefficient is 0.017534. It means that each unit increase in systolic blood pressure increases the log-odds ratio of the probability of developing coronary heart disease within 10 years by 0.017534 units.
+
+Glucose:The coefficient is 0.007280. It means that each unit increase in blood glucose level increases the log-odds ratio of the probability of developing coronary heart disease within 10 years by 0.007280 units.
+
+This logistic regression model examines the factors that affect the risk of developing coronary heart disease over 10 years. The model shows that age, gender, number of cigarettes per day, total cholesterol, systolic blood pressure, and blood sugar levels significantly affect this risk.
+
+#Real life application
+
+I think that even though a life-threatening event like a heart attack may not have much of an effect on gender, it does have a significant effect on age and other factors.Because daily cigarette consumption has important effects on organs such as the heart and lungs, at the same time, high glucose levels, cholesterol and blood pressure levels are important values for the human body and health and should be checked regularly.
